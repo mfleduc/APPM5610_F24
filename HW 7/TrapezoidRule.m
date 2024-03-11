@@ -13,8 +13,9 @@ y = y0;
 while t<tint(2)
      thisFty = fty(t,y(:,end));
      fn = @(x)(y(:,end)+0.5*h*(thisFty+fty(t+h,x)) - x);
-     guess = y(:,end)+h*thisFty;
-     yn = fsolve(fn,guess,opts);%Solve the equation that comes from the trapezoidal rule
+     eulerGuess = y(:,end)+h*thisFty;
+     heunGuess = y(:,end)+h/2*(thisFty+fty(t+h,eulerGuess));
+     yn = fsolve(fn,heunGuess,opts);%Solve the equation that comes from the trapezoidal rule
      t=t+h;
      y(:,end+1) = yn;
 end
