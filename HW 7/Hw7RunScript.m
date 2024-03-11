@@ -1,14 +1,31 @@
 %% LeDuc APPM 5610 HW 7 run script
-h = 10^-2;
-factor = 0.5.^(0:4);
+%Problem 1
+h = 10^-3;
+tol=1e-10;
+factor = 0.5.^(1:9);
 rhs = @Hw7Rhs;
 y0 = [1/2;0];
 tint = [0,3*pi];
-out = TrapezoidRule(rhs, y0,h,tint);
-y = out(1,:).*t;
 vals = zeros(length(factor),1);
-for kk = 1:lenth(factor)
-    out = TrapezoidRule(rhs, y0,h,tint);
-    vals(kk) = out(1,end)*3*pi;
+% for kk = 1:length(factor)
+%     out = TrapezoidRule(rhs, y0,h*factor(kk),tint);
+%     vals(kk) = out(1,end)*3*pi;
+% end
+%Richardson extrapolation
+prefactor = 1/factor(1)^2;
+N = length(factor)+1;
+R = zeros(N);
+trueVal = besselj(1,3*pi);
+out = TrapezoidRule(rhs, y0,h,tint);
+R(1,1) = out(1,end)*3*pi;
+for ii = 1:N-1
+    out = TrapezoidRule(rhs, y0,h*factor(ii),tint);
+    R(ii+1,1) = out(1,end)*3*pi;
+    for jj = 1:ii
+        R(ii+1,jj+1) = ((prefactor^jj).*R(ii + 1, jj) - R(ii, jj))/(prefactor^jj - 1);
+    end
+    del = abs(R(ii+1,ii+1)-trueVal)/abs(trueVal) ;
+    if del<tol
+       break 
+    end
 end
-reVal = RichardsonExtrap(vals,factor, 1e-10) ;
